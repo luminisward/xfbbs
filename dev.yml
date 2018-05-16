@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - $HOME/Docker/xfbbs/db:/data/db
+
+  nodebb:
+    image: nodebb/docker
+    restart: always
+    volumes:
+      - $HOME/Docker/xfbbs/nodebb/config.json:/usr/src/app/config.json
+      - $HOME/Docker/xfbbs/nodebb/build:/usr/src/app/build
+      - $HOME/Docker/xfbbs/nodebb/public:/usr/src/app/public
+    depends_on:
+      - mongo
+    # ports:
+    #   - "4567:4567"
+
+  # nginx:
+  #   image: nginx
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./docker-configs/nginx:/etc/nginx/conf.d
+  #   depends_on:
+  #     - nodebb
+
+  caddy:
+    build:
+      context: ./docker-configs/Caddy
+      args:
+        address: "0.0.0.0:80"
+    volumes:
+      - $HOME/Docker/xfbbs/caddy/certs:/etc/caddycerts
+    environment:
+      CADDYPATH: /etc/caddycerts
+    depends_on:
+      - nodebb
+    ports:
+      - "80:80"
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo

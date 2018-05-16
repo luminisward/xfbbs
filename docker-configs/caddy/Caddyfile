@@ -1,0 +1,16 @@
+timeouts 0
+proxy / nodebb:4567 {
+  header_upstream X-Real-IP {remote}
+  header_upstream X-Forwarded-For {remote}
+  header_upstream X-Forwarded-Proto {scheme}
+  header_upstream Host {host}
+
+  # Socket.IO Support
+  websocket
+  header_upstream Upgrade {>Upgrade}
+  header_upstream Connection {>Connection}
+}
+
+log stdout
+errors stdout
+gzip
